@@ -1,0 +1,40 @@
+{
+    "builders": [ {
+        "type": "azure-arm",
+
+        "client_id": "b6a7f67b-d63f-4ebe-88b5-0ee57dfa3db2",
+        "client_secret": "2Bjo9nh6~AGeFu7DVRfwDwt3-CO91f-U~g",
+        "tenant_id": "a09ede67-fac7-490e-9ddb-18e9c65dc9b3",
+        "subscription_id": "928dcbe5-e163-432f-9185-0550b1a94cf3",
+        "object_id": "a465c926-3313-4b98-8ff4-c432479c2c23",
+
+        "managed_image_resource_group_name": "MC-CustomImages-CUS",
+        "managed_image_name": "WindowsServer-PackerImage",
+
+        "os_type": "Windows",
+        "image_publisher": "MicrosoftWindowsServer",
+        "image_offer": "WindowsServer",
+        "image_sku": "2019-Datacenter",
+
+        "communicator": "winrm",
+        "winrm_use_ssl": "true",
+        "winrm_insecure": "true",
+        "winrm_timeout": "5m",
+        "winrm_username": "packer",
+
+        "azure_tags": {
+            "Owner": "Riley Stephens"
+        },
+
+        "location": "Central US",
+        "vm_size": "Standard_B2ms"
+    }],
+    "provisioners": [ {
+        "type": "powershell",
+        "inline": [
+            "Add-WindowsFeature Web-Server",
+            "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+            "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+        ]
+    }]
+}
